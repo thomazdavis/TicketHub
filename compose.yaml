@@ -1,13 +1,25 @@
+version: '3.8'
+
 services:
+  # Service 1: The Database
   postgres:
-    image: 'postgres:latest'
+    image: postgres:16
+    container_name: TicketHub-db
     environment:
-      - 'POSTGRES_DB=mydatabase'
-      - 'POSTGRES_PASSWORD=secret'
-      - 'POSTGRES_USER=myuser'
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: TicketHub
     ports:
-      - '5432'
+      - "5432:5432"  # Maps PC port 5432 to Container port 5432
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+
+  # Service 2: The Cache & Lock Manager
   redis:
-    image: 'redis:latest'
+    image: redis:7-alpine
+    container_name: TicketHub-redis
     ports:
-      - '6379'
+      - "6379:6379"
+
+volumes:
+  postgres_data:
