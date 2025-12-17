@@ -4,11 +4,11 @@ services:
   # Service 1: The Database
   postgres:
     image: postgres:16
-    container_name: TicketHub-db
+    container_name: tickethub-db
     environment:
       POSTGRES_USER: user
       POSTGRES_PASSWORD: password
-      POSTGRES_DB: TicketHub
+      POSTGRES_DB: tickethub
     ports:
       - "5432:5432"  # Maps PC port 5432 to Container port 5432
     volumes:
@@ -17,7 +17,7 @@ services:
   # Service 2: The Cache & Lock Manager
   redis:
     image: redis:7-alpine
-    container_name: TicketHub-redis
+    container_name: tickethub-redis
     ports:
       - "6379:6379"
 
