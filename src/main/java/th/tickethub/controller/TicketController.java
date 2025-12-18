@@ -1,9 +1,11 @@
 package th.tickethub.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import th.tickethub.model.Ticket;
-import th.tickethub.repository.TicketRepository;
+import th.tickethub.service.TicketService;
 
 import java.util.List;
 
@@ -12,36 +14,29 @@ import java.util.List;
 public class TicketController {
 
     @Autowired
-    private TicketRepository ticketRepository;
+    private TicketService ticketService;
 
     @GetMapping
     public List<Ticket> getAllTickets() {
-        return ticketRepository.findAll();
+        return ticketService.getAllTickets();
     }
 
     @PostMapping("/create")
-    public Ticket createTicket(@RequestParam String seatNumber) {
-        Ticket ticket = new Ticket();
-        ticket.setSeatNumber(seatNumber);
-        ticket.setSold(false);
-        ticket.setOwnerName(null);
-        return ticketRepository.save(ticket);
+    public ResponseEntity<?> createTicket(@RequestParam String seatNumber) {
+        try {
+            Ticket ticket = ticketService.createTicket(seatNumber);
+            return ResponseEntity.ok(ticket);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
+        }
     }
 
     @PostMapping("/book")
-    public String bootTicket(@RequestParam String seatNumber, @RequestParam String user, @RequestParam String userId) {
-        Ticket ticket = ticketRepository.findBySeatNumber(seatNumber)
-                .orElseThrow(() -> new RuntimeException("Seat not found: " + seatNumber));
-
-        if (ticket.isSold()) {
-            return "FAILED: Seat " + seatNumber + " is already taken by " + ticket.getOwnerName();
+    public String bookTicket(@RequestParam String seatNumber, @RequestParam String user, @RequestParam String userId) {
+        try {
+            return ticketService.bookTicket(seatNumber, user, userId);
+        } catch (RuntimeException e) {
+            return "Error: " + e.getMessage();
         }
-
-        ticket.setSold(true);
-        ticket.setOwnerName(user);
-        ticket.setOwnerId(userId);
-        ticketRepository.save(ticket);
-
-        return "SUCCESS: " + user + " booked " + seatNumber;
     }
 }
