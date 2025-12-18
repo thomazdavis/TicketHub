@@ -20,6 +20,9 @@ public class Ticket {
     private String seatNumber;
 
     private String ownerName;
+    private String ownerId;
+
+    private boolean isSold;
 
     // To prevent 2 people from purchasing the same ticket
     @Version
