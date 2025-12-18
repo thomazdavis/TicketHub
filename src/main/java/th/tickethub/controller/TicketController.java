@@ -39,4 +39,11 @@ public class TicketController {
             return "Error: " + e.getMessage();
         }
     }
+
+    // WARNING: For testing only! Never put this in production.
+    @PostMapping("/reset")
+    public String reset() {
+        ticketService.resetDatabase();
+        return "Database Cleared";
+    }
 }

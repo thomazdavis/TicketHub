@@ -2,6 +2,7 @@ package th.tickethub.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.dao.OptimisticLockingFailureException;
 import th.tickethub.model.Ticket;
 import th.tickethub.repository.TicketRepository;
 
@@ -40,8 +41,17 @@ public class TicketService {
         ticket.setOwnerName(user);
         ticket.setOwnerId(userId);
 
-        ticketRepository.save(ticket);
+        try {
+            ticketRepository.save(ticket);
+            return "SUCCESS: " + user + " booked " + seatNumber;
+        } catch (OptimisticLockingFailureException e) {
+            // This runs ONLY if the race condition occurs.
+            // It means someone else modified the record between our read and our save.
+            return "FAILED: You narrowly missed it! Seat was just taken by another user.";
+        }
+    }
 
-        return "SUCCESS: " + user + " booked " + seatNumber;
+    public void resetDatabase() {
+        ticketRepository.deleteAll();
     }
 }
