@@ -1,0 +1,70 @@
+#root {
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 2rem;
+    text-align: center;
+    font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+.stage {
+    background: #333;
+    color: white;
+    width: 80%;
+    padding: 10px;
+    border-radius: 0 0 10px 10px;
+    margin-bottom: 20px;
+}
+
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr); /* 5 seats per row */
+    gap: 10px;
+}
+
+.seat {
+    width: 60px;
+    height: 60px;
+    border-radius: 8px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.seat:active {
+    transform: scale(0.95);
+}
+
+.available {
+    background-color: #2ecc71; /* Green */
+    color: white;
+}
+
+.sold {
+    background-color: #e74c3c; /* Red */
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.6;
+}
+
+.user-panel {
+    background: #f0f0f0;
+    color: black;
+    padding: 10px 20px;
+    border-radius: 20px;
+}
+
+.log-panel {
+    margin-top: 20px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    width: 100%;
+    text-align: left;
+}

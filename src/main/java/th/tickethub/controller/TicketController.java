@@ -11,6 +11,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/tickets")
+@CrossOrigin(origins = "*") // allowing all connection for dev
 public class TicketController {
 
     @Autowired
