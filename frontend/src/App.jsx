@@ -41,7 +41,9 @@ function App() {
 
         // Cleanup on close
         return () => {
-            if (stompClient) stompClient.disconnect();
+            if (stompClient && stompClient.ws && stompClient.ws.readyState === 1) {
+                stompClient.disconnect();
+            }
         };
     }, []);
 
