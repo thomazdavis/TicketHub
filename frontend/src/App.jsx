@@ -1,20 +1,48 @@
 import { useState, useEffect } from 'react'
 import axios from 'axios'
+import SockJS from 'sockjs-client/dist/sockjs';
+import Stomp from 'stompjs';
 import './App.css'
 
 const API_URL = "http://localhost:8080/tickets";
+const WS_URL = "http://localhost:8080/ws"; // The WebSocket Endpoint
 
 function App() {
     const [seats, setSeats] = useState([]);
-    const [currentUser, _] = useState("User-" + Math.floor(Math.random() * 1000));
+    const [currentUser] = useState("User-" + Math.floor(Math.random() * 1000));
     const [log, setLog] = useState("");
 
-    // Load Seats on Startup
     useEffect(() => {
+        // Load seats on startup
         fetchSeats();
-        // Poll every 2 seconds to see updates
-        const interval = setInterval(fetchSeats, 2000);
-        return () => clearInterval(interval);
+
+        const socket = new SockJS(WS_URL);
+        const stompClient = Stomp.over(socket);
+
+        // To keep console clean
+        stompClient.debug = null;
+
+        stompClient.connect({}, () => {
+            setLog("Connected to Real-Time Server");
+
+            // Subscribe to Updates
+            stompClient.subscribe('/topic/seats', (message) => {
+                const soldSeatNumber = message.body;
+                setLog(`Real-time update: Seat ${soldSeatNumber} just sold!`);
+
+                // Update the Grid instantly
+                setSeats(currentSeats =>
+                    currentSeats.map(seat =>
+                        seat.seatNumber === soldSeatNumber ? { ...seat, sold: true } : seat
+                    )
+                );
+            });
+        });
+
+        // Cleanup on close
+        return () => {
+            if (stompClient) stompClient.disconnect();
+        };
     }, []);
 
     const fetchSeats = async () => {
@@ -41,13 +69,13 @@ function App() {
             const response = await axios.post(`${API_URL}/book`, null, { params });
 
             if (response.data.includes("SUCCESS")) {
-                setLog(`✅ Success! You booked ${seatNumber}`);
+                setLog(`Success! You booked ${seatNumber}`);
                 fetchSeats(); // Refresh immediately
             } else {
-                setLog(`❌ Failed: ${response.data}`);
+                setLog(`Failed: ${response.data}`);
             }
         } catch (error) {
-            setLog(`⚠️ Error: ${error.response ? error.response.data : error.message}`);
+            setLog(`Error: ${error.response ? error.response.data : error.message}`);
         }
     };
 

@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import th.tickethub.model.Ticket;
 import th.tickethub.repository.TicketRepository;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -18,6 +19,9 @@ public class TicketService {
 
     @Autowired
     private RedissonClient redissonClient;
+
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
 
     public List<Ticket> getAllTickets() {
         return ticketRepository.findAll();
@@ -64,6 +68,10 @@ public class TicketService {
             ticket.setOwnerName(user);
             ticket.setOwnerId(userId);
             ticketRepository.save(ticket);
+
+            // Push a message to everyone subscribed to "/topic/seats"
+            // We send the Seat Number so they know what to turn RED/booked.
+            messagingTemplate.convertAndSend("/topic/seats", seatNumber);
 
             return "SUCCESS: " + user + " booked " + seatNumber;
 
