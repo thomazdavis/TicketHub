@@ -2,24 +2,30 @@ import { useState, useEffect } from 'react'
 import axios from 'axios'
 import SockJS from 'sockjs-client/dist/sockjs';
 import Stomp from 'stompjs';
+import Login from './Login';
 import './App.css'
 
 const API_URL = "http://localhost:8080/tickets";
 const WS_URL = "http://localhost:8080/ws"; // The WebSocket Endpoint
 
 function App() {
+    const [user, setUser] = useState(null);
     const [seats, setSeats] = useState([]);
-    const [currentUser] = useState("User-" + Math.floor(Math.random() * 1000));
     const [log, setLog] = useState("");
 
+    const handleLogout = () => {
+        setUser(null);
+        setLog("");
+    };
+
     useEffect(() => {
-        // Load seats on startup
+        //  Connect to WebSocket only if a user is logged in!
+        if (!user) return;
+
         fetchSeats();
 
         const socket = new SockJS(WS_URL);
         const stompClient = Stomp.over(socket);
-
-        // To keep console clean
         stompClient.debug = null;
 
         stompClient.connect({}, () => {
@@ -45,34 +51,33 @@ function App() {
                 stompClient.disconnect();
             }
         };
-    }, []);
+    }, [user]); // Re-run this effect when 'user' changes
 
     const fetchSeats = async () => {
         try {
             const response = await axios.get(API_URL);
-            // If the DB is empty, the array might be empty.
-            // For now, we assume seats exist.
             setSeats(response.data.sort((a, b) => a.seatNumber.localeCompare(b.seatNumber)));
         } catch (error) {
             console.error("Error fetching seats:", error);
         }
     };
 
-    // Handle Booking
     const bookSeat = async (seatNumber) => {
+        if (!user) return; // Guard clause
+
         setLog(`Attempting to book ${seatNumber}...`);
         try {
-            // URLSearchParams because  backend expects @RequestParam
             const params = new URLSearchParams();
             params.append('seatNumber', seatNumber);
-            params.append('user', currentUser);
-            params.append('userId', currentUser); // Using name as ID for simplicity
+            // USE THE REAL USERNAME AND ID NOW!
+            params.append('user', user.username);
+            params.append('userId', user.id);
 
             const response = await axios.post(`${API_URL}/book`, null, { params });
 
             if (response.data.includes("SUCCESS")) {
                 setLog(`Success! You booked ${seatNumber}`);
-                fetchSeats(); // Refresh immediately
+                fetchSeats();
             } else {
                 setLog(`Failed: ${response.data}`);
             }
@@ -81,14 +86,19 @@ function App() {
         }
     };
 
+    if (!user) {
+        return <Login onLoginSuccess={setUser} />;
+    }
+
     return (
         <div className="container">
             <h1>TicketHub Live 🎟️</h1>
-            <div className="user-panel">
-                Acting as: <strong>{currentUser}</strong>
+            <div className="user-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span>Welcome, <strong>{user.username}</strong></span>
+                <button className="seat available" style={{ width: '80px', height: '30px', fontSize: '0.8rem' }} onClick={handleLogout}>Logout</button>
             </div>
 
-            <div className="stage">___ STAGE ___</div>
+            <div className="stage">___ STAGE (Event A) ___</div>
 
             <div className="seat-grid">
                 {seats.map((seat) => (
@@ -101,7 +111,6 @@ function App() {
                         {seat.seatNumber}
                     </button>
                 ))}
-                {seats.length === 0 && <p>No seats found. Use Postman to /create some!</p>}
             </div>
 
             <div className="log-panel">
