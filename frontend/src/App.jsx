@@ -9,11 +9,21 @@ const API_URL = "http://localhost:8080/tickets";
 const WS_URL = "http://localhost:8080/ws"; // The WebSocket Endpoint
 
 function App() {
-    const [user, setUser] = useState(null);
+    const [user, setUser] = useState(() => {
+        const savedUser = localStorage.getItem("user");
+        return savedUser ? JSON.parse(savedUser) : null;
+    });
+
     const [seats, setSeats] = useState([]);
     const [log, setLog] = useState("");
 
+    const handleLoginSuccess = (userData) => {
+        localStorage.setItem("user", JSON.stringify(userData));
+        setUser(userData);
+    };
+
     const handleLogout = () => {
+        localStorage.removeItem("user");
         setUser(null);
         setLog("");
     };
@@ -63,7 +73,7 @@ function App() {
     };
 
     const bookSeat = async (seatNumber) => {
-        if (!user) return; // Guard clause
+        if (!user) return;
 
         setLog(`Attempting to book ${seatNumber}...`);
         try {
@@ -87,14 +97,14 @@ function App() {
     };
 
     if (!user) {
-        return <Login onLoginSuccess={setUser} />;
+        return <Login onLoginSuccess={handleLoginSuccess} />;
     }
 
     return (
         <div className="container">
             <h1>TicketHub Live 🎟️</h1>
-            <div className="user-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span>Welcome, <strong>{user.username}</strong></span>
+            <div className="user-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '15px' }}>
+                <span>Welcome, <strong>{user.username}  </strong></span>
                 <button className="seat available" style={{ width: '80px', height: '30px', fontSize: '0.8rem' }} onClick={handleLogout}>Logout</button>
             </div>
 
@@ -111,11 +121,6 @@ function App() {
                         {seat.seatNumber}
                     </button>
                 ))}
-            </div>
-
-            <div className="log-panel">
-                <h3>System Log:</h3>
-                <p>{log}</p>
             </div>
         </div>
     )
