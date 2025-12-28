@@ -6,7 +6,7 @@ import Login from './Login';
 import './App.css'
 
 const API_URL = "http://localhost:8080/tickets";
-const WS_URL = "http://localhost:8080/ws"; // The WebSocket Endpoint
+const WS_URL = "http://localhost:8080/ws";
 
 function App() {
     const [user, setUser] = useState(() => {
@@ -14,7 +14,11 @@ function App() {
         return savedUser ? JSON.parse(savedUser) : null;
     });
 
+    const [currentView, setCurrentView] = useState('stage');
+    const [showUserMenu, setShowUserMenu] = useState(false);
+
     const [seats, setSeats] = useState([]);
+    const [myTickets, setMyTickets] = useState([]);
     const [log, setLog] = useState("");
 
     const handleLoginSuccess = (userData) => {
@@ -26,42 +30,20 @@ function App() {
         localStorage.removeItem("user");
         setUser(null);
         setLog("");
+        setMyTickets([]);
+        setShowUserMenu(false);
+        setCurrentView('stage');
     };
 
-    useEffect(() => {
-        //  Connect to WebSocket only if a user is logged in!
+    const fetchMyTickets = async () => {
         if (!user) return;
-
-        fetchSeats();
-
-        const socket = new SockJS(WS_URL);
-        const stompClient = Stomp.over(socket);
-        stompClient.debug = null;
-
-        stompClient.connect({}, () => {
-            setLog("Connected to Real-Time Server");
-
-            // Subscribe to Updates
-            stompClient.subscribe('/topic/seats', (message) => {
-                const soldSeatNumber = message.body;
-                setLog(`Real-time update: Seat ${soldSeatNumber} just sold!`);
-
-                // Update the Grid instantly
-                setSeats(currentSeats =>
-                    currentSeats.map(seat =>
-                        seat.seatNumber === soldSeatNumber ? { ...seat, sold: true } : seat
-                    )
-                );
-            });
-        });
-
-        // Cleanup on close
-        return () => {
-            if (stompClient && stompClient.ws && stompClient.ws.readyState === 1) {
-                stompClient.disconnect();
-            }
-        };
-    }, [user]); // Re-run this effect when 'user' changes
+        try {
+            const response = await axios.get(`${API_URL}/my-tickets?userId=${user.id}`);
+            setMyTickets(response.data);
+        } catch (error) {
+            console.error("Error fetching my tickets", error);
+        }
+    };
 
     const fetchSeats = async () => {
         try {
@@ -72,6 +54,42 @@ function App() {
         }
     };
 
+    // WebSocket & Initial Data Load
+    useEffect(() => {
+        if (!user) return;
+
+        fetchSeats();
+        fetchMyTickets();
+
+        const socket = new SockJS(WS_URL);
+        const stompClient = Stomp.over(socket);
+        stompClient.debug = null;
+
+        stompClient.connect({}, () => {
+            setLog("Connected to Real-Time Server");
+
+            stompClient.subscribe('/topic/seats', (message) => {
+                const soldSeatNumber = message.body;
+                setLog(`Update: Seat ${soldSeatNumber} sold!`);
+
+                // Update the Grid instantly
+                setSeats(currentSeats =>
+                    currentSeats.map(seat =>
+                        seat.seatNumber === soldSeatNumber ? { ...seat, sold: true } : seat
+                    )
+                );
+                // Refresh my tickets in case I was the one who bought it
+                fetchMyTickets();
+            });
+        });
+
+        return () => {
+            if (stompClient && stompClient.ws && stompClient.ws.readyState === 1) {
+                stompClient.disconnect();
+            }
+        };
+    }, [user]);
+
     const bookSeat = async (seatNumber) => {
         if (!user) return;
 
@@ -79,7 +97,6 @@ function App() {
         try {
             const params = new URLSearchParams();
             params.append('seatNumber', seatNumber);
-            // USE THE REAL USERNAME AND ID NOW!
             params.append('user', user.username);
             params.append('userId', user.id);
 
@@ -96,32 +113,116 @@ function App() {
         }
     };
 
+    const goToTickets = () => {
+        setCurrentView('tickets');
+        setShowUserMenu(false);
+    };
+
+    const goToStage = () => {
+        setCurrentView('stage');
+        setShowUserMenu(false); // Close menu if open
+    };
+
+
     if (!user) {
         return <Login onLoginSuccess={handleLoginSuccess} />;
     }
 
     return (
         <div className="container">
-            <h1>TicketHub Live 🎟️</h1>
-            <div className="user-panel" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '15px' }}>
-                <span>Welcome, <strong>{user.username}  </strong></span>
-                <button className="seat available" style={{ width: '80px', height: '30px', fontSize: '0.8rem' }} onClick={handleLogout}>Logout</button>
-            </div>
+            {/* --- HEADER --- */}
+            <div className="header">
+                <h1 style={{margin: 0, cursor: 'pointer'}} onClick={goToStage}>TicketHub Live 🎟️</h1>
 
-            <div className="stage">___ STAGE (Event A) ___</div>
-
-            <div className="seat-grid">
-                {seats.map((seat) => (
-                    <button
-                        key={seat.id}
-                        className={`seat ${seat.sold ? 'sold' : 'available'}`}
-                        onClick={() => !seat.sold && bookSeat(seat.seatNumber)}
-                        disabled={seat.sold}
+                {/* User Avatar & Dropdown */}
+                <div style={{ position: 'relative' }}>
+                    <div
+                        className="user-avatar"
+                        onClick={() => setShowUserMenu(!showUserMenu)}
+                        title={user.username}
                     >
-                        {seat.seatNumber}
-                    </button>
-                ))}
+                        {user.username.charAt(0).toUpperCase()}
+                    </div>
+
+                    {showUserMenu && (
+                        <div className="user-menu-dropdown">
+                            <div className="menu-item" onClick={goToTickets}>
+                                🎟️ My Tickets
+                            </div>
+                            <div className="menu-item" onClick={goToStage}>
+                                🏟️ Stage
+                            </div>
+                            <div className="menu-item logout" onClick={handleLogout}>
+                                🚪 Logout
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
+
+            {/* --- VIEW: STAGE (Main Grid) --- */}
+            {currentView === 'stage' && (
+                <div className="stage-view">
+                    <div className="stage">___ STAGE (Event A) ___</div>
+
+                    <div className="seat-grid">
+                        {seats.map((seat) => (
+                            <button
+                                key={seat.id}
+                                className={`seat ${seat.sold ? 'sold' : 'available'}`}
+                                onClick={() => !seat.sold && bookSeat(seat.seatNumber)}
+                                disabled={seat.sold}
+                            >
+                                {seat.seatNumber}
+                            </button>
+                        ))}
+                    </div>
+
+                    <div className="log-panel" style={{marginTop: '30px'}}>
+                        <h3>System Log:</h3>
+                        <p>{log}</p>
+                    </div>
+                </div>
+            )}
+
+            {/* --- VIEW: MY TICKETS --- */}
+            {currentView === 'tickets' && (
+                <div className="tickets-page">
+                    <button className="back-btn" onClick={goToStage}>← Back to Stage</button>
+                    <h2>My Tickets</h2>
+
+                    {myTickets.length === 0 ? (
+                        <div style={{ padding: '20px', background: '#f9f9f9', borderRadius: '8px', textAlign: 'center' }}>
+                            <p>You haven't booked any seats yet.</p>
+                            <button className="seat available" onClick={goToStage}>Find Seats</button>
+                        </div>
+                    ) : (
+                        <ul style={{ listStyle: 'none', padding: 0 }}>
+                            {myTickets.map(ticket => (
+                                <li key={ticket.id} style={{
+                                    background: 'white',
+                                    padding: '15px',
+                                    marginBottom: '15px',
+                                    borderLeft: '5px solid #2ecc71',
+                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
+                                    borderRadius: '4px',
+                                    display: 'flex',
+                                    justifyContent: 'space-between',
+                                    alignItems: 'center'
+                                }}>
+                                    <div>
+                                        <div style={{fontSize: '1.2rem', fontWeight: 'bold'}}>Seat {ticket.seatNumber}</div>
+                                        <div style={{color: '#666', fontSize: '0.9rem'}}>Event A • General Admission</div>
+                                    </div>
+                                    <div style={{ background: '#e8f8f5', color: '#2ecc71', padding: '5px 10px', borderRadius: '15px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                        CONFIRMED
+                                    </div>
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+            )}
         </div>
     )
 }

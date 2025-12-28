@@ -41,7 +41,12 @@ public class TicketController {
         }
     }
 
-    // WARNING: For testing only! Never put this in production.
+    @GetMapping("/my-tickets")
+    public List<Ticket> getMyTickets(@RequestParam String userId) {
+        return ticketService.getTicketsByUser(userId);
+    }
+
+    // For testing only!
     @PostMapping("/reset")
     public String reset() {
         ticketService.resetDatabase();

@@ -85,4 +85,8 @@ public class TicketService {
             }
         }
     }
+
+    public List<Ticket> getTicketsByUser(String userId) {
+        return ticketRepository.findByOwnerId(userId);
+    }
 }
