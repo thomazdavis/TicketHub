@@ -129,12 +129,12 @@ function App() {
     }
 
     return (
-        <div className="container">
-            {/* --- HEADER --- */}
-            <div className="header">
-                <h1 style={{margin: 0, cursor: 'pointer'}} onClick={goToStage}>TicketHub Live 🎟️</h1>
+        <>
+            <header className="header">
+                <h1 style={{ margin: 0, cursor: 'pointer', fontSize: '1.5rem' }} onClick={goToStage}>
+                    TicketHub 🎟️
+                </h1>
 
-                {/* User Avatar & Dropdown */}
                 <div style={{ position: 'relative' }}>
                     <div
                         className="user-avatar"
@@ -147,83 +147,76 @@ function App() {
                     {showUserMenu && (
                         <div className="user-menu-dropdown">
                             <div className="menu-item" onClick={goToTickets}>
-                                🎟️ My Tickets
+                                My Tickets
                             </div>
                             <div className="menu-item" onClick={goToStage}>
-                                🏟️ Stage
+                                Stage
                             </div>
                             <div className="menu-item logout" onClick={handleLogout}>
-                                🚪 Logout
+                                Logout
                             </div>
                         </div>
                     )}
                 </div>
-            </div>
+            </header>
 
-            {/* --- VIEW: STAGE (Main Grid) --- */}
-            {currentView === 'stage' && (
-                <div className="stage-view">
-                    <div className="stage">___ STAGE (Event A) ___</div>
+            {/* --- MAIN CONTENT --- */}
+            <main className="container">
 
-                    <div className="seat-grid">
-                        {seats.map((seat) => (
-                            <button
-                                key={seat.id}
-                                className={`seat ${seat.sold ? 'sold' : 'available'}`}
-                                onClick={() => !seat.sold && bookSeat(seat.seatNumber)}
-                                disabled={seat.sold}
-                            >
-                                {seat.seatNumber}
-                            </button>
-                        ))}
-                    </div>
+                {/* --- VIEW: STAGE --- */}
+                {currentView === 'stage' && (
+                    <div className="stage-view">
+                        <div className="stage">___ STAGE (Event A) ___</div>
 
-                    <div className="log-panel" style={{marginTop: '30px'}}>
-                        <h3>System Log:</h3>
-                        <p>{log}</p>
-                    </div>
-                </div>
-            )}
-
-            {/* --- VIEW: MY TICKETS --- */}
-            {currentView === 'tickets' && (
-                <div className="tickets-page">
-                    <button className="back-btn" onClick={goToStage}>← Back to Stage</button>
-                    <h2>My Tickets</h2>
-
-                    {myTickets.length === 0 ? (
-                        <div style={{ padding: '20px', background: '#f9f9f9', borderRadius: '8px', textAlign: 'center' }}>
-                            <p>You haven't booked any seats yet.</p>
-                            <button className="seat available" onClick={goToStage}>Find Seats</button>
-                        </div>
-                    ) : (
-                        <ul style={{ listStyle: 'none', padding: 0 }}>
-                            {myTickets.map(ticket => (
-                                <li key={ticket.id} style={{
-                                    background: 'white',
-                                    padding: '15px',
-                                    marginBottom: '15px',
-                                    borderLeft: '5px solid #2ecc71',
-                                    boxShadow: '0 2px 4px rgba(0,0,0,0.1)',
-                                    borderRadius: '4px',
-                                    display: 'flex',
-                                    justifyContent: 'space-between',
-                                    alignItems: 'center'
-                                }}>
-                                    <div>
-                                        <div style={{fontSize: '1.2rem', fontWeight: 'bold'}}>Seat {ticket.seatNumber}</div>
-                                        <div style={{color: '#666', fontSize: '0.9rem'}}>Event A • General Admission</div>
-                                    </div>
-                                    <div style={{ background: '#e8f8f5', color: '#2ecc71', padding: '5px 10px', borderRadius: '15px', fontSize: '0.8rem', fontWeight: 'bold' }}>
-                                        CONFIRMED
-                                    </div>
-                                </li>
+                        <div className="seat-grid">
+                            {seats.map((seat) => (
+                                <button
+                                    key={seat.id}
+                                    className={`seat ${seat.sold ? 'sold' : 'available'}`}
+                                    onClick={() => !seat.sold && bookSeat(seat.seatNumber)}
+                                    disabled={seat.sold}
+                                >
+                                    {seat.seatNumber}
+                                </button>
                             ))}
-                        </ul>
-                    )}
-                </div>
-            )}
-        </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* --- VIEW: MY TICKETS --- */}
+                {currentView === 'tickets' && (
+                    <div className="tickets-page">
+                        <button className="back-btn" onClick={goToStage}>
+                            <span>←</span> Back to Stage
+                        </button>
+
+                        <h2>My Tickets</h2>
+
+                        {myTickets.length === 0 ? (
+                            <div style={{ padding: '20px', background: '#f9f9f9', borderRadius: '8px', textAlign: 'center', width: '100%' }}>
+                                <p>You haven't booked any seats yet.</p>
+                                <button className="seat available" onClick={goToStage} style={{width: 'auto', padding: '0 20px', margin: '0 auto'}}>
+                                    Find Seats
+                                </button>
+                            </div>
+                        ) : (
+                            <ul>
+                                {myTickets.map(ticket => (
+                                    <li key={ticket.id} className="ticket-item">
+                                        <div>
+                                            <div style={{ fontSize: '1.2rem', fontWeight: 'bold' }}>Seat {ticket.seatNumber}</div>
+                                        </div>
+                                        <div style={{ background: '#e8f8f5', color: '#2ecc71', padding: '5px 10px', borderRadius: '15px', fontSize: '0.8rem', fontWeight: 'bold' }}>
+                                            CONFIRMED
+                                        </div>
+                                    </li>
+                                ))}
+                            </ul>
+                        )}
+                    </div>
+                )}
+            </main>
+        </>
     )
 }
 
