@@ -1,8 +1,6 @@
 package th.tickethub.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import th.tickethub.model.Ticket;
 import th.tickethub.service.TicketService;
@@ -17,36 +15,32 @@ public class TicketController {
     @Autowired
     private TicketService ticketService;
 
+    // Used by the "Stage" view to load seats for the selected concert
     @GetMapping
-    public List<Ticket> getAllTickets() {
-        return ticketService.getAllTickets();
+    public List<Ticket> getTicketsByEvent(@RequestParam Long eventId) {
+        return ticketService.getTicketsByEvent(eventId);
     }
 
-    @PostMapping("/create")
-    public ResponseEntity<?> createTicket(@RequestParam String seatNumber) {
-        try {
-            Ticket ticket = ticketService.createTicket(seatNumber);
-            return ResponseEntity.ok(ticket);
-        } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(e.getMessage());
-        }
-    }
-
+    // Used when a user clicks a seat
     @PostMapping("/book")
-    public String bookTicket(@RequestParam String seatNumber, @RequestParam String user, @RequestParam String userId) {
+    public String bookTicket(@RequestParam String seatNumber,
+                             @RequestParam Long eventId,
+                             @RequestParam String user,
+                             @RequestParam String userId) {
         try {
-            return ticketService.bookTicket(seatNumber, user, userId);
+            return ticketService.bookTicket(seatNumber, eventId, user, userId);
         } catch (RuntimeException e) {
             return "Error: " + e.getMessage();
         }
     }
 
+    // Used by the "My Wallet" view
     @GetMapping("/my-tickets")
     public List<Ticket> getMyTickets(@RequestParam String userId) {
         return ticketService.getTicketsByUser(userId);
     }
 
-    // For testing only!
+    // Used for Testing/Demo purposes to wipe data
     @PostMapping("/reset")
     public String reset() {
         ticketService.resetDatabase();

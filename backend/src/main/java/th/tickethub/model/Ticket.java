@@ -1,5 +1,6 @@
 package th.tickethub.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -16,7 +17,6 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true, nullable = false)
     private String seatNumber;
 
     private String ownerName;
@@ -27,4 +27,8 @@ public class Ticket {
     // To prevent 2 people from purchasing the same ticket
     @Version
     private Integer version;
+
+    @ManyToOne
+    @JoinColumn(name = "event_id", nullable = false)
+    private Event event;
 }
