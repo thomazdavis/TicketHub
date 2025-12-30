@@ -90,17 +90,15 @@ function App() {
             setLog("Connected to Real-Time Server");
 
             stompClient.subscribe('/topic/seats', (message) => {
-                const soldSeatNumber = message.body;
+                const payload = JSON.parse(message.body);
 
-                // Note: ideally we check if this seat belongs to the CURRENT event,
-                // but for this demo, we just update the grid to keep it simple.
-                setLog(`Update: Seat ${soldSeatNumber} sold!`);
-
-                setSeats(currentSeats =>
-                    currentSeats.map(seat =>
-                        seat.seatNumber === soldSeatNumber ? { ...seat, sold: true } : seat
-                    )
-                );
+                if (selectedEvent && selectedEvent.id === payload.eventId) {
+                    setSeats(currentSeats =>
+                        currentSeats.map(seat =>
+                            seat.seatNumber === payload.seatNumber ? { ...seat, sold: true } : seat
+                        )
+                    );
+                }
 
                 // Refresh my tickets (in case I was the one who bought it)
                 fetchMyTickets();

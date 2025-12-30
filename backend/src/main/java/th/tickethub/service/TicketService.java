@@ -8,7 +8,9 @@ import org.springframework.stereotype.Service;
 import th.tickethub.model.Ticket;
 import th.tickethub.repository.TicketRepository;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 
 @Service
@@ -28,7 +30,7 @@ public class TicketService {
     }
 
     public List<Ticket> getTicketsByUser(String userId) {
-        return ticketRepository.findByOwnerId(userId);
+        return ticketRepository.    findByOwnerId(userId);
     }
 
     // Clean DB for testing
@@ -64,7 +66,12 @@ public class TicketService {
             ticketRepository.save(ticket);
 
             // Real-time Notification
-            messagingTemplate.convertAndSend("/topic/seats", seatNumber);
+            // Create a simple payload
+            Map<String, Object> payload = new HashMap<>();
+            payload.put("seatNumber", seatNumber);
+            payload.put("eventId", eventId);
+
+            messagingTemplate.convertAndSend("/topic/seats", payload);
 
             return "SUCCESS: " + user + " booked " + seatNumber;
 
