@@ -110,7 +110,7 @@ function App() {
                 stompClient.disconnect();
             }
         };
-    }, [user]);
+    }, [user, selectedEvent]);
 
     // --- ACTIONS ---
 
