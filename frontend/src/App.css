@@ -1,3 +1,5 @@
+/* src/App.css */
+
 /* --- ROOT & GLOBAL RESET --- */
 #root {
     max-width: 100%;
@@ -14,212 +16,27 @@ body {
     background-color: #dfe8f3;
 }
 
-/* ---- LOGIN PAGE STYLES ---- */
-.login-wrapper {
-    position: relative;
-    width: 100vw;
-    height: 100vh;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    overflow: hidden;
-    background-color: #ffffff;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-
-.login-wrapper::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-image: url('./images/Login.png');
-    background-size: cover;
-    background-position: center;
-    background-repeat: no-repeat;
-    opacity: 0.15;
-    z-index: 0;
-}
-
-.login-card {
-    position: relative;
-    z-index: 1;
-    width: 100%;
-    max-width: 400px;
-    text-align: center;
-    padding: 1rem;
-}
-
-.login-title {
-    margin-bottom: 2rem;
-    color: #2c3e50;
-    font-size: 2.5rem;
-    font-weight: 800;
-    letter-spacing: -0.5px;
-}
-
-.input-group {
-    margin-bottom: 1rem;
-}
-
-.input-group input {
-    width: 100%;
-    padding: 14px 15px;
-    border: 1px solid #ccc;
-    border-radius: 6px;
-    font-size: 1rem;
-    box-sizing: border-box;
-    background-color: rgba(255, 255, 255, 0.9);
-    transition: all 0.2s;
-}
-
-.input-group input:focus {
-    border-color: #333;
-    background-color: #fff;
-    outline: none;
-}
-
-.auth-btn {
-    width: 100%;
-    padding: 14px;
-    background-color: #2c3e50;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    cursor: pointer;
-    transition: background-color 0.2s;
-    margin-top: 10px;
-}
-
-.auth-btn:hover {
-    background-color: #435b75;
-}
-
-.toggle-link {
-    margin-top: 1.5rem;
-    font-size: 0.9rem;
-    color: #666;
-    cursor: pointer;
-    text-decoration: none;
-}
-
-.toggle-link:hover {
-    color: #000;
-    text-decoration: underline;
-}
-
-.error-message {
-    color: #d73a49;
-    font-size: 0.9rem;
-    margin-bottom: 1rem;
-    padding: 5px;
-}
-
-/* --- FIXED HEADER --- */
-.header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 70px;
-
-    background-color: #acccf1;
-    color: #010217;
-    padding: 0 30px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    box-sizing: border-box;
-    z-index: 1000;
-}
-
 /* --- MAIN CONTENT CONTAINER --- */
 .container {
-    margin-top: 90px;
-
+    margin-top: 90px; /* Space for the fixed header */
     width: 100%;
     max-width: 1200px;
     margin-left: auto;
     margin-right: auto;
-
     display: flex;
     flex-direction: column;
     align-items: center;
-
-    position: relative; /* Needed for Back Button positioning */
+    position: relative;
     padding: 20px;
     box-sizing: border-box;
 }
 
-/* --- STAGE VIEW --- */
-.stage-view {
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    align-items: center; /* Ensures stage and grid are centered */
-}
-
-.stage {
-    background: #333;
-    color: white;
-    width: 60%;
-    min-width: 300px;
-    padding: 15px;
-    border-radius: 100px 100px 50px 50px;
-    margin-bottom: 60px;
-    text-align: center;
-    font-weight: bold;
-    letter-spacing: 2px;
-    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
-}
-
-.seat-grid {
-    display: grid;
-    grid-template-columns: repeat(5, 1fr);
-    gap: 15px;
-    justify-content: center;
-}
-
-/* --- SEAT BUTTONS --- */
-.seat {
-    width: 60px;
-    height: 60px;
-    border-radius: 12px;
-    border: none;
-    font-weight: bold;
-    cursor: pointer;
-    transition: all 0.2s;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.seat:active { transform: scale(0.95); }
-.available { background-color: #2ecc71; color: white; }
-.sold { background-color: #e74c3c; color: white; cursor: not-allowed; opacity: 0.5; }
-
-/* --- TICKETS PAGE --- */
-.tickets-page {
-    width: 100%;
-    max-width: 600px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    margin-top: 100px;
-}
-
-/* --- BACK BUTTON (Top Left of Container) --- */
+/* --- SHARED UTILITIES --- */
+/* (Used by both Stage and Wallet) */
 .back-btn {
     position: absolute;
     top: 0;
     left: 20px;
-
     background: none;
     border: none;
     color: #3498db;
@@ -236,65 +53,3 @@ body {
 .back-btn:hover {
     color: #2980b9;
 }
-
-/* --- TICKET LIST ITEMS --- */
-ul {
-    list-style: none;
-    padding: 0;
-    width: 100%;
-}
-
-.ticket-item {
-    background: white;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-left: 5px solid #2ecc71;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-    border-radius: 4px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    box-sizing: border-box;
-    text-align: left;
-}
-
-/* --- USER AVATAR & MENU --- */
-.user-avatar {
-    width: 40px;
-    height: 40px;
-    background-color: #180505;
-    color: #5b9bda;
-    border: 2px solid #34495e;
-    border-radius: 50%;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    font-weight: bold;
-    font-size: 1.2rem;
-    cursor: pointer;
-    user-select: none;
-}
-
-.user-menu-dropdown {
-    position: absolute;
-    top: 55px;
-    right: 0;
-    background: white;
-    border: 1px solid #ddd;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0,0,0,0.1);
-    overflow: hidden;
-    z-index: 101;
-    min-width: 160px;
-    text-align: left;
-}
-
-.menu-item {
-    padding: 7px 15px;
-    cursor: pointer;
-    border-bottom: 1px solid #f0f0f0;
-    color: #333;
-}
-.menu-item:hover { background-color: #f8f9fa; }
-.menu-item.logout { color: #e74c3c; }

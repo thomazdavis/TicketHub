@@ -1,0 +1,45 @@
+.stage-view {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+.stage {
+    background: #333;
+    color: white;
+    width: 60%;
+    min-width: 300px;
+    padding: 15px;
+    border-radius: 100px 100px 50px 50px;
+    margin-bottom: 60px;
+    text-align: center;
+    font-weight: bold;
+    letter-spacing: 2px;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.3);
+}
+
+.seat-grid {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 15px;
+    justify-content: center;
+}
+
+.seat {
+    width: 60px;
+    height: 60px;
+    border-radius: 12px;
+    border: none;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.seat:active { transform: scale(0.95); }
+.available { background-color: #2ecc71; color: white; }
+.sold { background-color: #e74c3c; color: white; cursor: not-allowed; opacity: 0.5; }
